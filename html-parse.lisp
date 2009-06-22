@@ -84,7 +84,7 @@ TODO
     (parse in)))
 
 (defmethod parse ((in stream))
-  (canonicaled-html-tree
+  (canonicalize-html-tree
    (let ((*end-tag-name* nil))
      (loop for char = (peek-char t in nil)
            while char
@@ -119,11 +119,11 @@ TODO
         while attribute-name
         collect (cons attribute-name (scan-attribute-value in))))
 
-(defun canonicaled-html-tree (doc)
+(defun canonicalize-html-tree (doc)
   (cond ((endp doc)
          nil)
         ((atom (car doc))
-         (append (list (car doc)) (make-html-tree (cdr doc))))
+         (append (list (car doc)) (canonicalize-html-tree (cdr doc))))
         (t
          (let* ((end-tag-name (q:string+ "/" (caar doc)))
                 (end-pos (position-if (lambda (x)
@@ -134,9 +134,9 @@ TODO
                (let ((children (subseq doc 1 (1+ end-pos))))
                  (cons
                   (append (car doc)
-                          (list (make-html-tree children)))
-                  (make-html-tree (subseq doc (+ 2 end-pos)))))
-               (cons (car doc) (make-html-tree (cdr doc))))))))
+                          (list (canonicalize-html-tree children)))
+                  (canonicalize-html-tree (subseq doc (+ 2 end-pos)))))
+               (cons (car doc) (canonicalize-html-tree (cdr doc))))))))
 
 #+nil
 (do-test

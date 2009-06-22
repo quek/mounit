@@ -4,6 +4,7 @@
   :serial t
   :components ((:file "package")
                (:file "unit")
+               (:file "html-tree")
                (:file "html-parse")
                (:file "selector-reader")
                (:file "selector")

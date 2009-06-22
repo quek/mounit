@@ -1,15 +1,14 @@
 (in-package :mounit)
 
-(defun select (x doc)
-  (cond ((endp x)
+(defun select (path doc)
+  (cond ((endp path)
          doc)
         (t
-         (select (cdr x)
-                 (caddr (find-if (lambda (y)
-                                   (and (consp y)
-                                        (equal (symbol-name (car x))
-                                               (car y))))
-                                 doc))))))
+         (select (cdr path)
+                 (children (find-if (lambda (x)
+                                      (equal (symbol-name (car path))
+                                             (name x)))
+                                    doc))))))
 
 #|
 (select '#?(html body)
