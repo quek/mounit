@@ -18,7 +18,7 @@
          (funcall *unit-ok-fun* ',x ,g!x-result ',y ,g!y-result)
          (funcall *unit-failed-fun* ',x ,g!x-result ',y ,g!y-result))))
 
-(defmacro with-unit (&body body)
+(defmacro do-test (&body body)
   `(let ((*unit-ok-p* t))
      ,@body
      (if *unit-ok-p*
@@ -26,5 +26,5 @@
          (print 'failed!!))))
 
 #+nil
-(with-unit (is 3 (+ 1 2)) (is 3 (+ 1 2)) (is 3 (+ 1 2))
-           (is 3 (+ 1 23)) (is 3 (+ 1 2)) (is 3 (+ 1 2)))
+(do-test (is 3 (+ 1 2)) (is 3 (+ 1 2)) (is 3 (+ 1 2))
+         (is 3 (+ 1 23)) (is 3 (+ 1 2)) (is 3 (+ 1 2)))

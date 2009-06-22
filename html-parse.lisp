@@ -138,7 +138,7 @@ TODO
                (cons (car doc) (make-html-tree (cdr doc))))))))
 
 #+nil
-(with-unit
+(do-test
   (is '(("div" nil) ("/div")) (parse " <div></div>"))
   (is '(("div" nil) ("/div")) (parse " <div/>"))
   (is '(("div" nil) "aa" ("/div")) (parse " <div>aa</div>"))
