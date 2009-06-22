@@ -84,13 +84,14 @@ TODO
     (parse in)))
 
 (defmethod parse ((in stream))
-  (let ((*end-tag-name* nil))
-    (loop for char = (peek-char t in nil)
-          while char
-          if (char= #\< char)
-            append (parse-tag in)
-          else
-            collect (parse-text in))))
+  (canonicaled-html-tree
+   (let ((*end-tag-name* nil))
+     (loop for char = (peek-char t in nil)
+           while char
+           if (char= #\< char)
+             append (parse-tag in)
+           else
+             collect (parse-text in)))))
 
 (defun parse-text (in)
   (scan-until in #'text-end-p))
@@ -118,7 +119,7 @@ TODO
         while attribute-name
         collect (cons attribute-name (scan-attribute-value in))))
 
-(defun make-html-tree (doc)
+(defun canonicaled-html-tree (doc)
   (cond ((endp doc)
          nil)
         ((atom (car doc))
@@ -139,26 +140,15 @@ TODO
 
 #+nil
 (do-test
-  (is '(("div" nil) ("/div")) (parse " <div></div>"))
-  (is '(("div" nil) ("/div")) (parse " <div/>"))
-  (is '(("div" nil) "aa" ("/div")) (parse " <div>aa</div>"))
-  (is '(("div" (("id" . "d1"))) "aa" ("/div"))
+  (is '(("div" nil nil)) (parse " <div></div>"))
+  (is '(("div" nil nil)) (parse " <div/>"))
+  (is '(("div" nil ("aa"))) (parse " <div>aa</div>"))
+  (is '(("div" (("id" . "d1")) ("aa")))
       (parse " <div id='d1'>aa</div>"))
-  (is '(("div" (("id" . "d1") ("class" . "c1")))
-        "aa" ("span" (("id" . "s1") ("class" . "s1"))) "bb" ("/span")
-        ("/div"))
+  (is '(("div" (("id" . "d1") ("class" . "c1"))
+         ("aa" ("span" (("id" . "s1") ("class" . "s1"))
+                       ("bb")))))
       (parse " <div id='d1' class='c1'>aa<span id='s1' class='s1'>bb</span></div>"))
-  (is '(("html" nil)
-        ("head" nil)
-        ("meta" (("http-equiv" . "Content-Type")
-                 ("content" . "text/html; charset=EUC-JP")))
-        ("meta" (("lang" . "ja")))
-        ("/head")
-        ("body" nil)
-        "hello"
-        ("/body")
-        ("/html"))
-      (parse "<html><head><meta http-equiv=\"Content-Type\" content='text/html; charset=EUC-JP'><meta lang='ja'></head><body>hello</body></html>"))
   (is '(("html" nil
          (("head" nil
                   (("meta"
@@ -166,5 +156,5 @@ TODO
                      ("content" . "text/html; charset=EUC-JP")))
                    ("meta" (("lang" . "ja")))))
           ("body" nil ("hello")))))
-      (make-html-tree (parse "<html><head><meta http-equiv=\"Content-Type\" content='text/html; charset=EUC-JP'><meta lang='ja'></head><body>hello</body></html>")))
+      (parse "<html><head><meta http-equiv=\"Content-Type\" content='text/html; charset=EUC-JP'><meta lang='ja'></head><body>hello</body></html>"))
   )

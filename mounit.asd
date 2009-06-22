@@ -5,6 +5,8 @@
   :components ((:file "package")
                (:file "unit")
                (:file "html-parse")
+               (:file "selector-reader")
+               (:file "selector")
                (:file "mounit"))
   :depends-on (series
                anaphora

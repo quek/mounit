@@ -1,29 +1,5 @@
 (in-package :mounit)
 
-(defvar *client* nil)
-
-(defclass client ()
-  ())
-
-(defmacro $ (&rest args)
-  (declare (ignore args))
-  nil)
-
-(defun request (url &optional (client *client*))
-  (values url client))
-
-(defun submit (&key (client *client*)
-                    form)
-  (values client form))
-
-(do-test ()
-  (request "http://www.google.co.jp/")
-  (is "ja" ($ "#f input[name='name']" val))
-  ($ "#f.#p" val= "lisp")
-  (submit)
-  (is "letter" ($ "div[name=list] a :first" :text))
-  )
-
 (defvar *original-readtable* nil)
 
 (defun |#?-reader|  (stream subchar arg)
