@@ -118,6 +118,25 @@ TODO
         while attribute-name
         collect (cons attribute-name (scan-attribute-value in))))
 
+(defun make-html-tree (doc)
+  (cond ((endp doc)
+         nil)
+        ((atom (car doc))
+         (append (list (car doc)) (make-html-tree (cdr doc))))
+        (t
+         (let* ((end-tag-name (q:string+ "/" (caar doc)))
+                (end-pos (position-if (lambda (x)
+                                        (and (consp x)
+                                             (equal end-tag-name (car x))))
+                                      (cdr doc))))
+           (if end-pos
+               (let ((children (subseq doc 1 (1+ end-pos))))
+                 (cons
+                  (append (car doc)
+                          (list (make-html-tree children)))
+                  (make-html-tree (subseq doc (+ 2 end-pos)))))
+               (cons (car doc) (make-html-tree (cdr doc))))))))
+
 #+nil
 (with-unit
   (is '(("div" nil) ("/div")) (parse " <div></div>"))
@@ -140,27 +159,12 @@ TODO
         ("/body")
         ("/html"))
       (parse "<html><head><meta http-equiv=\"Content-Type\" content='text/html; charset=EUC-JP'><meta lang='ja'></head><body>hello</body></html>"))
+  (is '(("html" nil
+         (("head" nil
+                  (("meta"
+                    (("http-equiv" . "Content-Type")
+                     ("content" . "text/html; charset=EUC-JP")))
+                   ("meta" (("lang" . "ja")))))
+          ("body" nil ("hello")))))
+      (make-html-tree (parse "<html><head><meta http-equiv=\"Content-Type\" content='text/html; charset=EUC-JP'><meta lang='ja'></head><body>hello</body></html>")))
   )
-
-#|
-(let ((doc '(("html")
-             ("head")
-             ("meta" (("http-equiv" . "Content-Type")
-                      ("content" . "text/html; charset=EUC-JP")))
-             ("meta" (("lang" . "ja")))
-             ("/head")
-             ("body")
-             "hello"
-             ("/body")
-             ("/html")
-             "aa")))
-  (labels ((f1 (doc)
-             (let ((tag (concatenate 'string "/" (caar doc))))
-               (let (children rest)
-                 (loop for i on (cdr doc)
-                       if (and (consp (car i)) (equal tag (caar i)))
-                         return (setf rest (cdr i))
-                       do (push (car i) children))
-                 (list tag (reverse children) rest)))))
-    (f1 doc)))
-|#
