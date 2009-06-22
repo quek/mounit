@@ -14,6 +14,15 @@
 (defmethod children (x)
   nil)
 
+(defmethod name ((x list))
+  (car x))
+
+(defmethod attributes ((x list))
+  (cadr x))
+
+(defmethod children ((x list))
+  (caddr x))
+
 (defun make-tag (name attributes children)
   (make-instance 'tag :name name :attributes attributes :children children))
 
